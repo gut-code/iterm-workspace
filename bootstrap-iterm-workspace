@@ -1,4 +1,5 @@
 #!/usr/bin/env osascript -l JavaScript
+ObjC.import('Foundation');
 
 function bootstrap(session, command, split) {
   if (command instanceof Array) {
@@ -46,9 +47,19 @@ function main(config) {
   tabs[0].select()
 }
 
+function getFileContents(path) {
+  const fm = $.NSFileManager.defaultManager;
+  let contents = fm.contentsAtPath(path); // NSData
+  contents = $.NSString.alloc.initWithDataEncoding(contents, $.NSUTF8StringEncoding).js || "[]";
+
+  return ObjC.unwrap(contents);
+}
+
 function run(argv) {
-  const fileContents = $.NSString.stringWithContentsOfFile(argv[0]).js || "[]"
-  const config = JSON.parse(fileContents)
+  var fm = $.NSFileManager.defaultManager;
+  const contents = getFileContents(argv[0]);
+
+  const config = JSON.parse(contents)
 
   main(config)
 }
